@@ -19,7 +19,6 @@ const Game = (function () {
 
   class Component {
     constructor(options = {}) {
-      console.log(this.tick);
       this.id = componentId++;
       this.logic = this.create();
       this.create = undefined;
@@ -140,10 +139,14 @@ const Game = (function () {
     }
   }
 
-  function setCamera(cameraId) {
-    const foundCamera = cameras.find(camera => camera.id === cameraId);
+  function findCamera(id) {
+    const foundCamera = cameras.find(camera => camera.id === id);
     if (!foundCamera) throw new Error('Camera id is invalid');
-    activeCamera = foundCamera;
+    return foundCamera;
+  }
+
+  function setCamera(id) {
+    activeCamera = findCamera(id);
   }
 
   function unsetCamera() {
@@ -158,6 +161,7 @@ const Game = (function () {
   }
 
   function stop() {
+    if (!isRunning) throw new Error('Game is already stopped!');
     clearInterval(tickInterval);
     clearInterval(renderInterval);
     isRunning = false;
@@ -179,12 +183,26 @@ const Game = (function () {
     return NewComponent;
   }
 
+  function createCamera(x, y, z) {
+    if (typeof x !== 'number' || typeof y !== 'number' || typeof z !== 'number')
+      throw new Error(`(${x}, ${y}, ${z}) is not a valid coordinate`);
+
+    const cameraId = new Camera(x, y, z).id;
+    return cameraId;
+  }
+
+  function moveCamera(id, x, y, z) {
+    const camera = findCamera(id);
+    camera.move(x, y, z);
+  }
+
   return {
-    createComponent,
-    Camera,
     start,
     stop,
+    createComponent,
+    createCamera,
     setCamera,
     unsetCamera,
+    moveCamera,
   };
 })();
