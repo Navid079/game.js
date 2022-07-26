@@ -50,6 +50,10 @@ const Game = (function () {
     getBorder({ cache } = {}) {
       if (!this.isMoved) return this.border;
       if (cache) this.isMoved = false;
+      else {
+        this.getPixelSize();
+        return this.getBorder();
+      }
       const minOffset = this.z;
       const maxOffset = Math.round(minOffset / ratio);
 
@@ -74,11 +78,7 @@ const Game = (function () {
     getPixelSize() {
       if (!this.isMoved) return this.pixelSize;
       const [x, y, width, height] = this.getBorder({ cache: true });
-      const [xPixels, yPixels] = [width - x, height - y];
-      this.pixelSize = [
-        Math.round(WIDTH / xPixels),
-        Math.round(HEIGHT / yPixels),
-      ];
+      this.pixelSize = [Math.round(WIDTH / width), Math.round(HEIGHT / height)];
 
       return this.pixelSize;
     }
@@ -90,17 +90,23 @@ const Game = (function () {
       this.isMoved = true;
     }
 
-    isVisible(x, y) {
+    isVisible(x, y, w, h) {
       const [sx, sy, width, height] = this.getBorder();
-      if (x < sx || x > sx + width || y < sy || y > sy + height) return false;
+      if (x + w < sx || x > sx + width || y + h < sy || y > sy + height)
+        return false;
       return true;
     }
 
     render(ctx) {
       for (let component of components) {
         let { x, y, width, height, sprite } = component.logic;
-        if (this.isVisible(x, y)) {
+        if (this.isVisible(x, y, width, height)) {
           const [pixelWidth, pixelHeight] = this.getPixelSize();
+          const [cx, cy, cw, ch] = this.getBorder();
+
+          x = Math.round((x - cx) * pixelWidth);
+          y = Math.round((y - cy) * pixelHeight);
+
           width = Math.round(width * pixelWidth);
           height = Math.round(height * pixelHeight);
 
