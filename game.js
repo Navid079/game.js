@@ -19,6 +19,7 @@ const Game = (function () {
 
   class Component {
     constructor(options = {}) {
+      console.log(this.tick);
       this.id = componentId++;
       this.logic = this.create();
       this.create = undefined;
@@ -145,6 +146,10 @@ const Game = (function () {
     activeCamera = foundCamera;
   }
 
+  function unsetCamera() {
+    activeCamera = undefined;
+  }
+
   function start() {
     if (isRunning) throw new Error('Game is already running!');
     tickInterval = setInterval(tick, 50);
@@ -158,11 +163,28 @@ const Game = (function () {
     isRunning = false;
   }
 
+  function createComponent(tick, render, create) {
+    if (typeof tick !== 'function') throw new Error('tick must be a function');
+    if (typeof render !== 'function')
+      throw new Error('render must be a function');
+    if (typeof create !== 'function')
+      throw new Error('create must be a function');
+
+    class NewComponent extends Component {}
+
+    NewComponent.prototype.tick = tick;
+    NewComponent.prototype.render = render;
+    NewComponent.prototype.create = create;
+
+    return NewComponent;
+  }
+
   return {
-    Component,
+    createComponent,
+    Camera,
     start,
     stop,
-    Camera,
     setCamera,
+    unsetCamera,
   };
 })();
