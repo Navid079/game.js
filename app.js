@@ -6,12 +6,13 @@
     render() {
       console.log('render');
     }
-    logic() {
+    create() {
       return {
         a: 'b',
       };
     }
   }
   const c = new Comp();
-  c.tick();
+  Game.start()
+  setTimeout(Game.stop, 1000)
 })();
