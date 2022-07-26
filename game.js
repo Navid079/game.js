@@ -1,4 +1,9 @@
 const Game = (function () {
+  const canvas = document.getElementById('gamejs');
+  const context = canvas.getContext('2d');
+  const WIDTH = canvas.width;
+  const HEIGHT = canvas.height;
+
   let id = 0;
   let components = [];
   let tickInterval;
@@ -6,10 +11,11 @@ const Game = (function () {
   let isRunning = false;
 
   class Component {
-    constructor() {
+    constructor(options = {}) {
       this.id = id++;
       this.logic = this.create();
       this.create = undefined;
+      this.options = options;
       components.push(this);
     }
 
@@ -33,8 +39,14 @@ const Game = (function () {
   }
 
   function render() {
+    context.clearRect(0, 0, WIDTH, HEIGHT);
     for (let component of components) {
-      component.render();
+      if (component.options.autoRender) {
+        const { sprite, x, y } = component.logic;
+        context.drawImage(sprite, x, y);
+        continue;
+      }
+      component.render(context);
     }
   }
 
